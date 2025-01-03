@@ -13,8 +13,8 @@ import TableRow from '@mui/material/TableRow';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import { useSelector } from 'react-redux';
-import AddMaterial from './AddMaterial'; // Component to handle adding materials
-import DialogComponent from './DialogComponent'; // Component for dialog handling
+import AddMaterial from './AddMaterial';
+import DialogComponent from './DialogComponent';
 
 const columns = [
   { id: 'materialNumber', label: 'Sl. No', minWidth: 90 },
@@ -39,27 +39,23 @@ export default function ToolTable() {
   const currentUser = useSelector((state) => state.user.currentUser);
 
   useEffect(() => {
-  console.log('Current User:', currentUser);
-  const fetchMaterials = async () => {
-    try {
-      const res = await fetch('/user/getMaterial');
-      const data = await res.json();
-      if (data.success) {
-        const updatedMaterials = data.materials.map((material) => ({
-          ...material,
-          isAvailable: material.stock < 1, 
-        }));
-        setRows(updatedMaterials);
+    const fetchMaterials = async () => {
+      try {
+        const res = await fetch('/user/getMaterial');
+        const data = await res.json();
+        if (data.success) {
+          const updatedMaterials = data.materials.map((material) => ({
+            ...material,
+            isAvailable: material.stock > 0, 
+          }));
+          setRows(updatedMaterials);
+        }
+      } catch (error) {
+        console.error('Error fetching materials:', error);
       }
-    } catch (error) {
-      console.error('Error fetching materials:', error);
-    }
-  };
-
-  fetchMaterials();
-}, [currentUser]);
-
-  
+    };
+    fetchMaterials();
+  }, [currentUser]);
 
   const handleOpenDialog = (mode, row = null) => {
     setDialogMode(mode);
@@ -72,23 +68,58 @@ export default function ToolTable() {
     setCurrentRow(null);
   };
 
-  const handleDialogSubmit = (updatedRow) => {
-   
+  const handleEditSubmit = async (updatedRow) => {
+    try {
+      const res = await fetch(`/user/editMaterial/${updatedRow._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRow),
+      });
+      const data = await res.json();
+      console.log('Edit Response:', data); // Debugging
+      if (data.success) {
+        setRows((prevRows) =>
+          prevRows.map((row) => (row._id === updatedRow._id ? updatedRow : row))
+        );
+        handleCloseDialog();
+      }
+    } catch (error) {
+      console.error('Error updating material:', error);
+    }
   };
-
-  const handleEditSubmit = (updatedRow) => {
-   
-  };
-
- 
-  const filteredRows = rows.filter((row) =>
-    ['materialNumber', 'materialName', 'category'].some((key) => {
-      const value = row[key];
-      return value?.toString().toLowerCase().includes(searchTerm.toLowerCase());
-    })
-  );
   
+  const handleDeleteSubmit = async (rowId) => {
+    try {
+      const res = await fetch(`/user/deleteMaterial/${rowId}`,
+         { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setRows((prevRows) => prevRows.filter((row) => row._id !== rowId));
+        handleCloseDialog();
+      } else {
+        console.error('Delete failed:', data.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error deleting material:', error);
+    }
+  };
  
+  const handleDialogSubmit = (updatedRow) => {
+    const actions = {
+      edit: () => handleEditSubmit(updatedRow),
+      delete: () => handleDeleteSubmit(updatedRow._id),
+    };
+  
+    actions[dialogMode]?.();
+  };
+  
+  
+
+  const filteredRows = rows.filter((row) =>
+    ['materialNumber', 'materialName', 'category'].some((key) =>
+      row[key]?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
   return (
     <Paper sx={{ width: '100%', overflow: 'hidden', padding: 2 }}>
@@ -103,7 +134,7 @@ export default function ToolTable() {
         />
       </div>
       <TableContainer sx={{ maxHeight: 440 }}>
-        <Table aria-label="material table">
+        <Table stickyHeader aria-label="material table">
           <TableHead>
             <TableRow>
               {columns.map((column) => (
@@ -116,43 +147,29 @@ export default function ToolTable() {
           <TableBody>
             {filteredRows
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row, index) => (
-                <TableRow hover role="checkbox" key={row.materialNumber}>
+              .map((row) => (
+                <TableRow hover key={row._id}>
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
                       <TableCell key={column.id} align={column.align}>
-  {column.id === 'isAvailable' ? (
-    <span
-      style={{
-        color: value ? 'red' : 'green',
-        fontWeight: 'bold',
-      }}
-    >
-      {value ? 'Unavailable' : 'Available'}
-    </span>
-  ) : column.id === 'actions' ? (
-    <div>
-      <IconButton
-        onClick={() => handleOpenDialog('edit', row)}
-        color="primary"
-        aria-label="edit"
-      >
-        <EditIcon />
-      </IconButton>
-      <IconButton
-        onClick={() => handleOpenDialog('delete', row)}
-        color="secondary"
-        aria-label="delete"
-      >
-        <DeleteIcon />
-      </IconButton>
-    </div>
-  ) : (
-    value
-  )}
-</TableCell>
-
+                        {column.id === 'isAvailable' ? (
+                          <span style={{ color: value ? 'green' : 'red', fontWeight: 'bold' }}>
+                            {value ? 'Available' : 'Unavailable'}
+                          </span>
+                        ) : column.id === 'actions' ? (
+                          <div>
+                            <IconButton onClick={() => handleOpenDialog('edit', row)} color="primary">
+                              <EditIcon />
+                            </IconButton>
+                            <IconButton onClick={() => handleOpenDialog('delete', row)} color="secondary">
+                              <DeleteIcon />
+                            </IconButton>
+                          </div>
+                        ) : (
+                          value
+                        )}
+                      </TableCell>
                     );
                   })}
                 </TableRow>
@@ -161,7 +178,7 @@ export default function ToolTable() {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[1, 2, 3]}
+        rowsPerPageOptions={[5, 10, 15]}
         component="div"
         count={filteredRows.length}
         rowsPerPage={rowsPerPage}
@@ -172,7 +189,7 @@ export default function ToolTable() {
       <DialogComponent
         open={dialogOpen}
         mode={dialogMode}
-        row={currentRow}
+        data={currentRow}
         onClose={handleCloseDialog}
         onSubmit={handleDialogSubmit}
       />

@@ -27,7 +27,7 @@ export default function AddMaterial() {
     price: '',
     stock: '',
     description: '',
-    category: 'select', // Default value
+    category: 'select',
   });
 
   const handleOpen = () => setOpen(true);
@@ -78,7 +78,7 @@ export default function AddMaterial() {
   return (
     <div>
       <Button variant="outlined" color="info" onClick={handleOpen}>
-        Add Material
+        Add 
       </Button>
       <Modal
         aria-labelledby="add-material-title"

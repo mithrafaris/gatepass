@@ -5,6 +5,7 @@ import SignUp from '../pages/sign-Up'
 import Dashboard from '../pages/Dashboard';
 import Customer from '../pages/User';
 import Tools from '../pages/Tools';
+import GatepassTool from '../pages/gatePassTool';
 
 
 const Router = createBrowserRouter([
@@ -23,6 +24,9 @@ const Router = createBrowserRouter([
   },{
     path:'/Tools',
     element:<Tools/>
+  },{
+    path:'/gatePassTool',
+    element:<GatepassTool/>
   }
 ]);
 

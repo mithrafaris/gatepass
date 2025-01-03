@@ -7,24 +7,39 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 export default function DialogComponent({ open, onClose, mode, data, onSubmit }) {
-  const [formData, setFormData] = useState(data || {});
+  const [formData, setFormData] = useState({});
 
-useEffect(() => {
-  
-  
-  }, []);
+  // Sync data to formData when data changes
+  useEffect(() => {
+    if (data) {
+      setFormData(data);
+    } else {
+      setFormData({});
+    }
+  }, [data]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = () => {
     if (mode === 'edit') {
-      onSubmit(formData);
+      if (formData.materialName && formData.materialNumber) {
+        onSubmit(formData);
+      } else {
+        alert('Please fill all required fields.');
+        return;
+      }
     } else if (mode === 'delete') {
-      onSubmit(formData.id);  
+      if (formData.id) {
+        onSubmit(formData.id);
+      } else {
+        alert('No material selected to delete.');
+        return;
+      }
     }
-    onClose(); 
+    onClose();
   };
 
   return (
@@ -32,21 +47,20 @@ useEffect(() => {
       <DialogTitle>{mode === 'edit' ? 'Edit Material' : 'Confirm Delete'}</DialogTitle>
       <DialogContent>
         {mode === 'edit' ? (
-          <div>
-          <TextField
-          margin="dense"
-          label="material Number"
-          name="material Name"
-          value={formData. materialNumber || ''}
-          onChange={handleChange}
-          fullWidth
-        />
-
+          <>
             <TextField
               margin="dense"
-              label="material Name"
+              label="Material Number"
+              name="materialNumber"
+              value={formData.materialNumber || ''}
+              onChange={handleChange}
+              fullWidth
+            />
+            <TextField
+              margin="dense"
+              label="Material Name"
               name="materialName"
-              value={formData. materialNumber || ''}
+              value={formData.materialName || ''}
               onChange={handleChange}
               fullWidth
             />
@@ -84,9 +98,9 @@ useEffect(() => {
               onChange={handleChange}
               fullWidth
             />
-          </div>
+          </>
         ) : (
-          <p>Are you sure you want to delete this item?</p>
+          <p>Are you sure you want to delete this material?</p>
         )}
       </DialogContent>
       <DialogActions>

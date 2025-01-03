@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Material = require('./material.model')
 
 const passSchema = new mongoose.Schema({
     PassNumber: {
@@ -6,6 +7,9 @@ const passSchema = new mongoose.Schema({
         required: true,
     },
     customerName: {
+        type: String,
+    }, 
+    customerAddress: {
         type: String,
     },
     OutDate: {
@@ -21,10 +25,9 @@ const passSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-    },
-    address: {
-        type: String,
-    },
+        required: true,
+        enum: ['Cash','Card', 'Online'],
+      },
     material: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: "Material",
