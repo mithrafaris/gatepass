@@ -1,3 +1,4 @@
+// controllers/materialController.js
 const Material = require('../models/material.model');
 const { errorHandler } = require('../utils/error');
 
@@ -15,11 +16,11 @@ exports.createMaterial = async (req, res, next) => {
   }
 };
 
-
+// Get All Materials
 exports.getMaterial = async (req, res, next) => {
   try {
-    const materials = await Material.find(); 
-    if (!materials || materials.length === 0) {
+    const materials = await Material.find();
+    if (!materials.length) {
       return next(errorHandler(404, 'No materials found!'));
     }
     res.status(200).json({
@@ -30,26 +31,28 @@ exports.getMaterial = async (req, res, next) => {
     next(errorHandler(500, 'Server error occurred while fetching materials.'));
   }
 };
-exports.getMaterialsbyID = async(req,res,next)=>{
+
+// Get Material by ID
+exports.getMaterialsbyID = async (req, res, next) => {
   try {
-    const materialsID = await Material.findById(req.params.id)
-    if (!materialsID || materialsID.length === 0) {
-      return next(errorHandler(404, 'No materials found!'));
+    const material = await Material.findById(req.params.id);
+    if (!material) {
+      return next(errorHandler(404, 'Material not found!'));
     }
     res.status(200).json({
       success: true,
-      materialsID ,
+      material,
     });
   } catch (error) {
-    next(errorHandler(500, 'Server error occurred while fetching materials.'));
+    next(errorHandler(500, 'Server error occurred while fetching the material.'));
   }
-}
+};
+
 // Edit Material
 exports.editMaterial = async (req, res, next) => {
   try {
-    console.log(req.params.id);
     const { id } = req.params;
-    const updatedMaterial = await Material.findByIdAndUpdate(id, req.body, { new: true });
+    const updatedMaterial = await Material.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
     if (!updatedMaterial) {
       return next(errorHandler(404, 'Material not found!'));
     }
@@ -59,25 +62,25 @@ exports.editMaterial = async (req, res, next) => {
       updatedMaterial,
     });
   } catch (error) {
-    next(errorHandler(400, 'Failed to update material!'));
+    next(errorHandler(400, 'Failed to update material! Please check the provided data.'));
   }
 };
 
 // Delete Material
+// Delete Material
 exports.deleteMaterial = async (req, res, next) => {
-  console.log("hii");
   try {
-    console.log(req.params.id);
     const { id } = req.params;
-    const deletedMaterial = await Material.findByIdAndDelete(id);
+    const deletedMaterial = await Material.findByIdAndDelete(id); // Remove req.body
     if (!deletedMaterial) {
       return next(errorHandler(404, 'Material not found!'));
     }
     res.status(200).json({
       success: true,
       message: 'Material deleted successfully!',
+      deletedMaterial,
     });
   } catch (error) {
-    next(errorHandler(400, 'Failed to delete material!'));
+    next(errorHandler(500, 'Server error occurred while deleting the material.'));
   }
 };

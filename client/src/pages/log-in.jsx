@@ -35,7 +35,7 @@ function Login() {
         toast.success('Login successful', {
           icon: '👏',
         });
-        navigate('/');
+        navigate('/dashboard');
       } else {
         dispatch(signInFailure(res.data.message));
         toast.error(res.data.message || 'Sign-in failed.');

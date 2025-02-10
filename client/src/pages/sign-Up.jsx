@@ -29,7 +29,7 @@ function SignUp() {
       toast('Successfully created your account', {
         icon: '👏',
       });
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       setLoading(false);
       if (error.response && error.response.data) {
@@ -92,7 +92,7 @@ function SignUp() {
             </div>
             <p className="px-6 text-sm text-center dark:text-gray-600">
               Already have an account?
-              <Link to="/login">
+              <Link to="/">
                 <span className="text-red-900"> Sign In</span>
               </Link>
             </p>

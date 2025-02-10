@@ -1,37 +1,49 @@
 const mongoose = require("mongoose");
-const Material = require('./material.model')
 
 const passSchema = new mongoose.Schema({
     PassNumber: {
-        type: Number,
+        type: String, 
         required: true,
+        unique: true, 
     },
     customerName: {
-        type: String,
-    }, 
+        type: String, 
+        required: true,
+    },
     customerAddress: {
-        type: String,
+        type: String, 
+        required: true,
     },
     OutDate: {
         type: Date,
-        default: new Date(),
+        default: Date.now,
+        get: function(value) {
+            if (!value) return null;
+            return new Date(value).toLocaleDateString('en-GB'); 
+        }
     },
-    inDate: {
+    ReturnDate: {
         type: Date,
-        default: new Date(),
+        get: function(value) {
+            if (!value) return null;
+            return new Date(value).toLocaleDateString('en-GB');
+        }
     },
     totalAmount: {
         type: Number,
     },
     paymentMethod: {
         type: String,
+        enum: ['Cash', 'Card', 'Online'],
         required: true,
-        enum: ['Cash','Card', 'Online'],
-      },
-    material: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: "Material",
     },
+    material: {
+        type: String,
+        required: true,
+    }
+}, { 
+    toJSON: { getters: true }, 
+    toObject: { getters: true } 
 });
 
 module.exports = mongoose.model("Pass", passSchema);

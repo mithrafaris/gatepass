@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Backdrop from '@mui/material/Backdrop';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
@@ -57,7 +59,7 @@ export default function AddMaterial() {
       }
 
       const data = await res.json();
-      console.log('Material added successfully:', data);
+      toast.success('Material added successfully!');
 
       // Reset form data after successful submission
       setFormData({
@@ -70,15 +72,15 @@ export default function AddMaterial() {
       });
       handleClose();
     } catch (error) {
-      console.error('Error adding material:', error);
-      alert('Failed to add material. Please try again.');
+      toast.error('Failed to add material. Please try again.');
     }
   };
 
   return (
     <div>
+      <ToastContainer position="top-right" autoClose={3000} />
       <Button variant="outlined" color="info" onClick={handleOpen}>
-        Add 
+        Add
       </Button>
       <Modal
         aria-labelledby="add-material-title"
@@ -162,7 +164,7 @@ export default function AddMaterial() {
               fullWidth
               margin="normal"
             >
-              {['select','Accessories', 'Tools', 'Parts'].map((option) => (
+              {['select', 'Accessories', 'Tools', 'Parts'].map((option) => (
                 <MenuItem key={option} value={option}>
                   {option}
                 </MenuItem>
