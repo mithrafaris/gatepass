@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const morgan = require('morgan'); 
 const userRouter = require('./routes/userRoutes')
+import path from 'path';
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -19,6 +20,11 @@ app.use(cookieParser());
 connectDB();
 
 app.use('/user', userRouter);
+app.use(express.static(path.join(__dirname, '/client/dist')))
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
+});
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
