@@ -19,6 +19,7 @@ app.use(morgan('common'));
 app.use(cookieParser());
 connectDB();
 
+
 app.use('/user', userRouter);
 app.use(express.static(path.join(__dirname, '/client/dist')))
 app.get('*', (req, res) => {
