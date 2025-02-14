@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const morgan = require('morgan'); 
 const userRouter = require('./routes/userRoutes')
-import path from 'path';
+
 
 dotenv.config({ path: path.join(__dirname, '.env') });
 
