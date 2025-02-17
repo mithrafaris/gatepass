@@ -1,10 +1,10 @@
 {
   "name": "dashboard",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "Api/server.js",
   "scripts": {
     "dev": "nodemon Api/server.js",
-    "start": "node Api/server.js",
+    "start": "node Api/server.js", 
     "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
   "author": "",
