@@ -55,6 +55,8 @@ exports.updatecategory = async (req, res, next) => {
 };
 
 exports.getcategory = async (req, res, next) => {
+  console.log("hoo");
+  
   try {
     const category = await category.findById(req.params.id);  
     if (!category) {
