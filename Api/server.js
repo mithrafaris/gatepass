@@ -5,40 +5,37 @@ const connectDB = require('./Database/connection');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cors = require('cors'); // Add CORS if needed
 const userRouter = require('./routes/userRoutes');
 
-// Load environment variables from .env file
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-// Create an Express app
 const app = express();
 
-// Middleware setup
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan('common'));
 app.use(cookieParser());
+app.use(cors()); // Enable CORS if needed
 
-// Connect to the database
+// Database Connection
 connectDB();
 
-// Route setup
+// Routes
 app.use('/user', userRouter);
 
-// Serve static files (frontend build)
-const buildPath = process.env.NODE_ENV === 'production'
-  ? path.join(__dirname, '/client/dist')  // If production, use dist folder
-  : path.join(__dirname, '/client/public'); // If development, use public folder
-app.use(express.static(buildPath));
+// Serve static files
+app.use(express.static(path.join(__dirname, '/client/dist')));
 
-// Catch-all route for all other requests to serve index.html (SPA)
+// Catch-all route for SPA
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
 });
 
-// Global error handler
+// Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   const statusCode = err.statusCode || 500;
@@ -50,7 +47,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Set the port and start the server
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

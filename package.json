@@ -1,11 +1,12 @@
 {
   "name": "dashboard",
   "version": "1.0.0",
-  "main": "Api/server.js",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon Api/server.js",
-    "start": "node Api/server.js", 
-    "build": "npm install && npm install --prefix client && npm run build --prefix client"
+    "start": "node Api/server.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
@@ -13,18 +14,13 @@
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "lucide-react": "^0.468.0",
     "mongoose": "^8.9.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.9",
-    "persist": "^0.2.7",
-    "react-hot-toast": "^2.5.1",
-    "react-toastify": "^11.0.3",
-    "redux": "^5.0.1",
-    "swiper": "^11.1.15"
+    "nodemon": "^3.1.9"
   }
 }
