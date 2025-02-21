@@ -4,6 +4,7 @@ import Header from "../partials/Header";
 import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import * as Yup from "yup";
 import toast, { Toaster } from "react-hot-toast";
+import { FaTrash, FaPlus, FaPaperPlane } from "react-icons/fa";
 
 function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -137,8 +138,11 @@ function Dashboard() {
                     </div>
 
                     <div className="mt-6">
-                      <button type="submit" disabled={isSubmitting} className="btn bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md">
-                        {isSubmitting ? "Submitting..." : "Submit"}
+                      <button type="submit" disabled={isSubmitting}   className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >   <FaPaperPlane className="w-4 h-4 mr-2" /> 
+                  {isSubmitting ? "Submitting..." : "Submit"}
+                    
+                       
                       </button>
                     </div>
                   </Form>
