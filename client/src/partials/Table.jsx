@@ -19,13 +19,13 @@ import PrintIcon from '@mui/icons-material/Print';
 
 const columns = [
   { id: 'PassNumber', label: 'Sl.No', minWidth: 90 },
-  { id: 'customerName', label: 'Customer Name', minWidth: 130 },
+  { id: 'customerName', label: 'Customer Name', minWidth: 100 },
   { id: 'customerAddress', label: 'Customer Address', minWidth: 150, align: 'right' },
-  { id: 'ReturnDate', label: 'Return Date', minWidth: 130, align: 'right' },
-  { id: 'OutDate', label: 'Out Date', minWidth: 130, align: 'right' },
-  { id: 'totalAmount', label: 'Total Amount', minWidth: 130, align: 'right', format: (value) => value.toFixed(2) },
-  { id: 'paymentMethod', label: 'Payment Method', minWidth: 130, align: 'right' },
-  { id: 'material', label: 'Material', minWidth: 150, align: 'right' },
+  { id: 'OutDate', label: 'Out Date', minWidth: 100, align: 'right' },
+  { id: 'ReturnDate', label: 'Return Date', minWidth: 100, align: 'right' },
+  { id: 'totalAmount', label: 'Total Amount', minWidth: 100, align: 'right', format: (value) => value.toFixed(2) },
+  { id: 'paymentMethod', label: 'Payment Method', minWidth: 100, align: 'right' },
+  { id: 'materials', label: 'Materials & Qty', minWidth: 200, align: 'right' },
 ];
 
 export default function StickyHeadTable() {
@@ -35,25 +35,25 @@ export default function StickyHeadTable() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const fetchMaterials = async () => {
-      try {
-        const res = await fetch('/user/getpass');
-        const data = await res.json();
-        if (data.success && Array.isArray(data.pass)) {
-          setRows(data.pass);
-          toast.success('Data fetched successfully!', { position: 'top-right' });
-        } else {
-          setRows([]);
-          toast.warn('No data found.', { position: 'top-right' });
-        }
-      } catch (error) {
-        console.error('Error fetching gate passes:', error);
-        toast.error('Failed to fetch data!', { position: 'top-right' });
-      }
-    };
-
     fetchMaterials();
   }, []);
+
+  const fetchMaterials = async () => {
+    try {
+      const res = await fetch('/user/getpass');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.pass)) {
+        setRows(data.pass);
+        toast.success('Data fetched successfully!', { position: 'top-right' });
+      } else {
+        setRows([]);
+        toast.warn('No data found.', { position: 'top-right' });
+      }
+    } catch (error) {
+      console.error('Error fetching gate passes:', error);
+      toast.error('Failed to fetch data!', { position: 'top-right' });
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
@@ -71,39 +71,137 @@ export default function StickyHeadTable() {
     }
   };
 
-  const handleChangePage = (_, newPage) => {
+  const generatePDF = (customer) => {
+    try {
+      // Debug log to check customer data
+      console.log('Generating PDF for customer:', customer);
+
+      if (!customer || !customer.materials) {
+        toast.error('Invalid customer data!');
+        return;
+      }
+
+      const doc = new jsPDF();
+
+      // Add company header
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Bridgeway Motors LLP', doc.internal.pageSize.width / 2, 20, { align: 'center' });
+
+      // Add invoice title
+      doc.setFontSize(16);
+      doc.text('MATERIAL GATE PASS INVOICE', doc.internal.pageSize.width / 2, 30, { align: 'center' });
+
+      // Add pass number and date
+      doc.setFontSize(12);
+      doc.text(`Pass Number: ${customer.PassNumber || 'N/A'}`, 14, 40);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, doc.internal.pageSize.width - 14, 40, { align: 'right' });
+      doc.autoTable({
+        startY: 50,
+        head: [['Customer Information']],
+        body: [
+          ['Name:', customer.customerName],
+          ['Address:', customer.customerAddress],
+          ['Out Date:', customer.OutDate ],
+          ['Return Date:', customer.ReturnDate],
+        ],
+        theme: 'plain',
+        headStyles: {
+          fillColor: [220, 220, 220],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 'auto' }
+        },
+        margin: { left: 14 }
+      });
+
+      // Materials table with validation
+      const materialsTableHeaders = [['Material Name', 'Quantity']];
+      const materialsTableBody = Array.isArray(customer.materials) 
+        ? customer.materials.map(material => [
+            material.materialName || 'N/A',
+            (material.quantity || 'N/A').toString()
+          ])
+        : [['No materials', 'N/A']];
+
+      doc.autoTable({
+        startY: doc.previousAutoTable.finalY + 10,
+        head: materialsTableHeaders,
+        body: materialsTableBody,
+        theme: 'grid',
+        headStyles: {
+          fillColor: [70, 70, 70],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        margin: { left: 14 }
+      });
+
+      // Payment information
+      doc.autoTable({
+        startY: doc.previousAutoTable.finalY + 10,
+        head: [['Payment Details']],
+        body: [
+          ['Payment Method:', customer.paymentMethod || 'N/A'],
+          ['Total Amount:', customer.totalAmount ? `₹${customer.totalAmount.toFixed(2)}` : 'N/A'],
+        ],
+        theme: 'plain',
+        headStyles: {
+          fillColor: [220, 220, 220],
+          textColor: [0, 0, 0],
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          0: { cellWidth: 40 },
+          1: { cellWidth: 'auto' }
+        },
+        margin: { left: 14 }
+      });
+
+      // Add signature space
+      const pageHeight = doc.internal.pageSize.height;
+      doc.setFontSize(10);
+      doc.text('Authorised Signatory', doc.internal.pageSize.width / 2, pageHeight - 30, { align: 'center' });
+      doc.text('Thank you for your business!', doc.internal.pageSize.width / 2, pageHeight - 20, { align: 'center' });
+
+      // Save PDF
+      const fileName = `GatePass_${customer.PassNumber || 'NA'}_${customer.customerName || 'Unknown'}.pdf`;
+      doc.save(fileName);
+      toast.success('PDF generated successfully!', { position: 'top-right' });
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      console.log('Customer data:', customer);
+      toast.error('Failed to generate PDF!', { position: 'top-right' });
+    }
+  };
+
+  const handlePrintInvoice = (customer) => {
+    if (!customer) {
+      toast.warn('No customer selected for invoice.', { position: 'top-right' });
+      return;
+    }
+    console.log('Print button clicked with customer data:', customer);
+    generatePDF(customer);
+  };
+
+  const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(+event.target.value);
     setPage(0);
   };
 
-  const filteredRows = rows.filter((row) =>
-    columns.some((column) => {
-      const value = row[column.id];
-      return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
-    })
+  const filteredRows = rows.filter(row =>
+    Object.values(row).some(value =>
+      String(value).toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
-
-  const handlePrint = () => {
-    const doc = new jsPDF();
-    doc.text('Gate Pass List', 14, 10);
-
-    const tableColumn = columns.map(col => col.label);
-    const tableRows = filteredRows.map(row =>
-      columns.map(col => row[col.id] || '-')
-    );
-
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
-
-    doc.save('GatePass_List.pdf');
-  };
 
   return (
     <div>
@@ -118,9 +216,6 @@ export default function StickyHeadTable() {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={{ maxWidth: 250 }}
           />
-          <Button variant="contained" color="primary" onClick={handlePrint} startIcon={<PrintIcon />}>
-            Print
-          </Button>
         </div>
 
         <TableContainer sx={{ maxHeight: 440 }}>
@@ -128,7 +223,11 @@ export default function StickyHeadTable() {
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.id} align={column.align} style={{ minWidth: column.minWidth }}>
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
                     {column.label}
                   </TableCell>
                 ))}
@@ -136,31 +235,41 @@ export default function StickyHeadTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredRows.length > 0 ? (
-                filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+              {filteredRows
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((row) => (
                   <TableRow hover role="checkbox" tabIndex={-1} key={row._id}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell key={column.id} align={column.align}>
-                          {column.format && typeof value === 'number' ? column.format(value) : value || '-'}
-                        </TableCell>
-                      );
-                    })}
+                    {columns.map((column) => (
+                      <TableCell key={column.id} align={column.align}>
+                        {column.id === 'materials' ? (
+                          <ul>
+                            {row.materials.map((mat, index) => (
+                              <li key={index}>
+                                {mat.materialName} (Qty: {mat.quantity})
+                              </li>
+                            ))}
+                          </ul>
+                        ) : column.format && typeof row[column.id] === 'number' ? (
+                          column.format(row[column.id])
+                        ) : (
+                          row[column.id] || '-'
+                        )}
+                      </TableCell>
+                    ))}
                     <TableCell align="center">
                       <IconButton onClick={() => handleDelete(row._id)} color="error">
                         <DeleteIcon />
                       </IconButton>
+                      <Button
+                        color="primary"
+                        onClick={() => handlePrintInvoice(row)}
+                        startIcon={<PrintIcon />}
+                      >
+                        Print
+                      </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length + 1} align="center">
-                    No matching data found
-                  </TableCell>
-                </TableRow>
-              )}
+                ))}
             </TableBody>
           </Table>
         </TableContainer>

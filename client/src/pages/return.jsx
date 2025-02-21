@@ -3,8 +3,7 @@ import Sidebar from "../partials/Sidebar";
 import Header from "../partials/Header";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-
+import { FaTrash, FaPlus, FaPaperPlane } from "react-icons/fa"; // Import icons
 
 function Return() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,15 +11,48 @@ function Return() {
     PassNumber: "",
     customerName: "",
     ReturnDate: "",
-    material: "",
+    materials: [{ materialName: "", quantity: "" }],
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e, index = null) => {
+    if (index !== null) {
+      const updatedMaterials = [...formData.materials];
+      updatedMaterials[index][e.target.name] = e.target.value;
+      setFormData({ ...formData, materials: updatedMaterials });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
+
+  const addMaterialField = () => {
+    setFormData({
+      ...formData,
+      materials: [...formData.materials, { materialName: "", quantity: "" }],
+    });
+  };
+
+  const removeMaterialField = (index) => {
+    const updatedMaterials = [...formData.materials];
+    updatedMaterials.splice(index, 1);
+    setFormData({ ...formData, materials: updatedMaterials });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.PassNumber.trim() || !formData.customerName.trim() || !formData.ReturnDate) {
+      toast.warn("Please fill all required fields!", { position: "top-right" });
+      return;
+    }
+
+    if (
+      formData.materials.length === 0 ||
+      formData.materials.some((mat) => !mat.materialName.trim() || !mat.quantity || mat.quantity <= 0)
+    ) {
+      toast.warn("Material name and quantity must be valid!", { position: "top-right" });
+      return;
+    }
+
     try {
       const response = await fetch("/user/return-material", {
         method: "PUT",
@@ -32,7 +64,12 @@ function Return() {
 
       if (data.success) {
         toast.success("Material returned successfully!", { position: "top-right" });
-        setFormData({ PassNumber: "", customerName: "", ReturnDate: "", material: "" });
+        setFormData({
+          PassNumber: "",
+          customerName: "",
+          ReturnDate: "",
+          materials: [{ materialName: "", quantity: "" }],
+        });
       } else {
         toast.warn(data.message || "Failed to return material", { position: "top-right" });
       }
@@ -51,64 +88,99 @@ function Return() {
             <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white mb-8">
               Return Material
             </h1>
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+              <form onSubmit={handleSubmit} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Pass Number
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Pass Number</label>
                     <input
                       type="text"
                       name="PassNumber"
                       value={formData.PassNumber}
                       onChange={handleChange}
-                      className="form-input w-full border-gray-300 rounded-md text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Customer Name
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
                     <input
                       type="text"
                       name="customerName"
                       value={formData.customerName}
                       onChange={handleChange}
-                      className="form-input w-full border-gray-300 rounded-md text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Return Date
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Return Date</label>
                     <input
                       type="date"
                       name="ReturnDate"
                       value={formData.ReturnDate}
                       onChange={handleChange}
-                      className="form-input w-full border-gray-300 rounded-md text-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-1">
-                      Material
-                    </label>
-                    <input
-                      type="text"
-                      name="material"
-                      value={formData.material}
-                      onChange={handleChange}
-                      className="form-input w-full border-gray-300 rounded-md text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required
                     />
                   </div>
                 </div>
-                <div className="mt-6">
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">Materials</h3>
+                    <button
+                      type="button"
+                      onClick={addMaterialField}
+                      className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <FaPlus className="w-4 h-4 mr-2" />
+                      Add Material
+                    </button>
+                  </div>
+
+                  {formData.materials.map((mat, index) => (
+                    <div key={index} className="flex items-center gap-4">
+                      <input
+                        type="text"
+                        name="materialName"
+                        placeholder="Material Name"
+                        value={mat.materialName}
+                        onChange={(e) => handleChange(e, index)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                      <input
+                        type="number"
+                        name="quantity"
+                        placeholder="Quantity"
+                        value={mat.quantity}
+                        onChange={(e) => handleChange(e, index)}
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required
+                      />
+                      {formData.materials.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeMaterialField(index)}
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
+                        >
+                          <FaTrash className="w-5 h-5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex justify-end">
                   <button
                     type="submit"
-                    className="btn bg-blue-500 text-white hover:bg-blue-600 px-4 py-2 rounded-md"
+                    className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    Submit
+                    <FaPaperPlane className="w-4 h-4 mr-2" />
+                    Submit Return
                   </button>
                 </div>
               </form>
