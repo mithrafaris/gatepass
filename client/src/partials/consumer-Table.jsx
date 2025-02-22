@@ -93,7 +93,7 @@ export default function CustomPaginationTable() {
         id: user._id // Use MongoDB _id as id
       }));
       setRows(formattedData);
-      toast.success("Users fetched successfully!");
+     
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -118,8 +118,8 @@ export default function CustomPaginationTable() {
 
       if (!response.ok) throw new Error("Failed to delete user");
 
-      toast.success("User deleted successfully!");
-      fetchUsers(); // Refresh the user list
+      
+      fetchUsers(); 
     } catch (error) {
       toast.error(error.message);
     } finally {

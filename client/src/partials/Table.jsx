@@ -43,7 +43,7 @@ export default function GatePassList() {
       const data = await res.json();
       if (data.success && Array.isArray(data.pass)) {
         setRows(data.pass);
-        toast.success('Data fetched successfully!', { position: 'top-right' });
+        
       } else {
         setRows([]);
         toast.warn('No data found.', { position: 'top-right' });
