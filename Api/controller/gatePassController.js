@@ -146,3 +146,63 @@ exports.deletePass = async (req, res, next) => {
     next(errorHandler(500, 'Failed to delete gate pass!'));
   }
 };
+
+
+exports.editPass = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Parse dates if they exist
+    const parseDateString = (dateStr) => {
+      if (!dateStr) return null;
+      
+      // Split the date string into components
+      const [day, month, year] = dateStr.split('/');
+      // Create a new Date object (month is 0-based in JavaScript)
+      return new Date(year, month - 1, day);
+    };
+
+    const updateData = {
+      customerName: req.body.customerName,
+      customerAddress: req.body.customerAddress,
+      totalAmount: req.body.totalAmount,
+      paymentMethod: req.body.paymentMethod,
+      Remarks: req.body.Remarks
+    };
+
+    // Only add dates if they exist and are valid
+    if (req.body.OutDate) {
+      const parsedOutDate = parseDateString(req.body.OutDate);
+      if (parsedOutDate && !isNaN(parsedOutDate)) {
+        updateData.OutDate = parsedOutDate;
+      }
+    }
+
+    if (req.body.ReturnDate) {
+      const parsedReturnDate = parseDateString(req.body.ReturnDate);
+      if (parsedReturnDate && !isNaN(parsedReturnDate)) {
+        updateData.ReturnDate = parsedReturnDate;
+      }
+    }
+
+    // Find and update the gate pass
+    const updatedGatePass = await Gatepass.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedGatePass) {
+      return next(errorHandler(404, 'Gate pass not found!'));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Gate pass updated successfully!',
+      updatedGatePass,
+    });
+  } catch (error) {
+    console.error('Error updating gate pass:', error);
+    return next(errorHandler(500, 'Failed to update gate pass!'));
+  }
+};

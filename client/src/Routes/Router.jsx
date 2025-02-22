@@ -8,7 +8,7 @@ import Tools from '../pages/Tools';
 import Return from '../pages/return';
 import OutList from '../pages/out-list';
 import Pdf from '../pages/pdf';
-
+import Details from '../pages/Details';
 
 const Router = createBrowserRouter([
   {
@@ -38,11 +38,15 @@ const Router = createBrowserRouter([
   {
     path: '/outlist',
     element: <OutList />,
-  },{
-    path:'/pdf',
-    element:<Pdf/>
-  }
- 
+  },
+  {
+    path: '/pdf',
+    element: <Pdf />,
+  },
+  {
+    path: '/details',
+    element: <Details />, 
+  },
 ]);
 
 export default Router;
