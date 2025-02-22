@@ -52,8 +52,8 @@ const passSchema = new mongoose.Schema({
         required: true 
     }
 }, {
-    toJSON: { getters: true }, // Ensure getters are applied when converting to JSON
-    toObject: { getters: true } // Ensure getters are applied when converting to objects
+    toJSON: { getters: true }, 
+    toObject: { getters: true } 
 });
 
 const Pass = mongoose.model("Pass", passSchema);

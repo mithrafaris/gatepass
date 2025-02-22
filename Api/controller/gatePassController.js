@@ -4,7 +4,7 @@ const { errorHandler } = require('../utils/error');
 
 exports.createPass = async (req, res) => {
   try {
-    const { PassNumber, customerName, customerAddress, materials, OutDate, totalAmount, paymentMethod } = req.body;
+    const { PassNumber, customerName, customerAddress, materials, OutDate, totalAmount, paymentMethod,Remarks } = req.body;
 
     // Fetch material names and update stock
     const updatedMaterials = await Promise.all(materials.map(async (mat) => {
@@ -25,7 +25,8 @@ exports.createPass = async (req, res) => {
       return {
         materialId: mat.materialId,
         materialName: materialData.materialName,
-        quantity: mat.quantity
+        quantity: mat.quantity,
+        Remarks:mat.Remarks
       };
     }));
 
@@ -36,7 +37,8 @@ exports.createPass = async (req, res) => {
       materials: updatedMaterials,
       OutDate,
       totalAmount,
-      paymentMethod
+      paymentMethod,
+      Remarks
     });
 
     await newPass.save();

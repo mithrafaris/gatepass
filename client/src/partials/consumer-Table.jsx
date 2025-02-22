@@ -85,7 +85,7 @@ export default function CustomPaginationTable() {
           ...user,
         }));
         setRows(formattedData);
-       
+        toast.success("Users fetched successfully!");
       } catch (error) {
         toast.error(error.message);
       } finally {

@@ -19,37 +19,49 @@ const Pdf = () => {
     const generatePDF = async () => {
       try {
         const doc = new jsPDF();
-        const carIcon = 'https://img.icons8.com/ios/452/car--v1.png';
-        `)}`;
-         doc.addImage(carIcon, 'JPEG', 20, 20, 30, 20);
-         doc.setFontSize(22);
+        
+        // Move icon to top
+        const carIcon = 'https://img.icons8.com/?size=100&id=VH1jBQbwHr7s&format=png&color=000000';
+        doc.addImage(carIcon, 'JPEG', 5, 10, 45, 25);
+        
+        // Company name
+        doc.setFontSize(30);
         doc.setFont('helvetica', 'bold');
-        doc.text('Bridgeway Motors LLP', doc.internal.pageSize.width / 2, 20, { align: 'center' });
-        doc.setFontSize(18);
+        doc.text('Bridgeway Motors LLP', doc.internal.pageSize.width / 2, 25, { align: 'center' });
+        
+        // Contact information moved between company name and gate pass title
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text(' Dealer for Mercedes-Benz Passenger Car,', doc.internal.pageSize.width / 2, 35, { align: 'center' });
+        doc.text('Farook College PO, Office: Calicut NH Bypass Road, Azhinjilam, Calicut-673632', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+        
+        // Gate pass title
+        doc.setFontSize(15);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(44, 62, 80);
-        doc.text('MATERIAL GATE PASS INVOICE', doc.internal.pageSize.width / 2, 35, { align: 'center' });
-        
+        doc.text('MATERIAL GATE PASS', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+       
         // Add decorative line
         doc.setDrawColor(44, 62, 80);
         doc.setLineWidth(0.5);
-        doc.line(14, 40, doc.internal.pageSize.width - 14, 40);
+        doc.line(14, 55, doc.internal.pageSize.width - 14, 55);
         
         // Add pass number and date with improved styling
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(0, 0, 0);
-        doc.text(`Pass Number: ${customer.PassNumber}`, 14, 50);
-        doc.text(`Date: ${customer.OutDate}`, doc.internal.pageSize.width - 14, 50, { align: 'right' });
+        doc.text(`Pass Number: ${customer.PassNumber}`, 14, 65);
+        doc.text(`Date: ${customer.OutDate}`, doc.internal.pageSize.width - 14, 65, { align: 'right' });
         
-        // Customer information table with improved styling
+        // Customer information table with improved styling and remarks
         doc.autoTable({
-          startY: 60,
+          startY: 75,
           head: [['Customer Information']],
           body: [
             [`Name: ${customer.customerName}`],
             [`Address: ${customer.customerAddress}`],
             [`Return Date: ${customer.ReturnDate}`],
+            
           ],
           theme: 'striped',
           headStyles: { 
@@ -71,7 +83,7 @@ const Pdf = () => {
           head: [['Material Name', 'Quantity']],
           body: customer.materials.map(material => [
             material.materialName,
-            material.quantity.toString()
+            material.quantity.toString(),
           ]),
           theme: 'grid',
           headStyles: {
@@ -94,7 +106,7 @@ const Pdf = () => {
           head: [['Payment Details']],
           body: [
             [`Payment Method: ${customer.paymentMethod}`],
-            [`Total Amount: $${customer.totalAmount.toFixed(2)}`],
+            [`Total Amount: ${customer.totalAmount.toFixed(2)}`],
           ],
           theme: 'plain',
           headStyles: {
@@ -119,7 +131,6 @@ const Pdf = () => {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.text('Thank you for choosing Bridgeway Motors LLP', doc.internal.pageSize.width / 2, pageHeight - 25, { align: 'center' });
-        doc.text('For any queries,please contact: Dealer for Mercedes-Benz Passenger Car, Farook College PO,Office:Calicut NH Bypass Road,Azhinjilam,Calicut-673632 ', doc.internal.pageSize.width / 2, pageHeight - 20, { align: 'center' });
         
         // Save PDF
         doc.save(`GatePass_${customer.PassNumber}_${customer.customerName}.pdf`);

@@ -20,11 +20,11 @@ import PrintIcon from '@mui/icons-material/Print';
 
 const columns = [
   { id: 'PassNumber', label: 'Sl.No', minWidth: 90 },
-  { id: 'customerName', label: 'Customer Name', minWidth: 100 },
-  { id: 'customerAddress', label: 'Customer Address', minWidth: 150, align: 'right' },
+  { id: 'customerName', label: 'Customer', minWidth: 100 },
+  { id: 'customerAddress', label: 'Address', minWidth: 150, align: 'right' },
   { id: 'OutDate', label: 'Out Date', minWidth: 100, align: 'right' },
   { id: 'ReturnDate', label: 'Return Date', minWidth: 100, align: 'right' },
-  { id: 'totalAmount', label: 'Total Amount', minWidth: 100, align: 'right', format: (value) => value.toFixed(2) },
+  { id: 'totalAmount', label: 'Amount', minWidth: 100, align: 'right', format: (value) => value.toFixed(2) },
   { id: 'paymentMethod', label: 'Payment Method', minWidth: 100, align: 'right' },
   { id: 'materials', label: 'Materials & Qty', minWidth: 200, align: 'right' },
 ];
