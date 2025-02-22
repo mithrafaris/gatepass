@@ -13,12 +13,19 @@ import {
   Paper,
   IconButton,
   TableHead,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import {
   FirstPage as FirstPageIcon,
   KeyboardArrowLeft,
   KeyboardArrowRight,
   LastPage as LastPageIcon,
+  Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -73,28 +80,58 @@ export default function CustomPaginationTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch("/user/getuser");
+      if (!response.ok) throw new Error("Failed to fetch users");
+      const data = await response.json();
+      const formattedData = data.map((user) => ({
+        ...user,
+        id: user._id // Use MongoDB _id as id
+      }));
+      setRows(formattedData);
+      toast.success("Users fetched successfully!");
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/user/getuser");
-        if (!response.ok) throw new Error("Failed to fetch users");
-        const data = await response.json();
-        const formattedData = data.map((user, index) => ({
-          id: index + 1,
-          ...user,
-        }));
-        setRows(formattedData);
-        toast.success("Users fetched successfully!");
-      } catch (error) {
-        toast.error(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   }, []);
+
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const response = await fetch(`/user/delete/${userToDelete._id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error("Failed to delete user");
+
+      toast.success("User deleted successfully!");
+      fetchUsers(); // Refresh the user list
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setUserToDelete(null);
+  };
 
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
@@ -110,20 +147,33 @@ export default function CustomPaginationTable() {
   return (
     <div>
       <ToastContainer />
-      <h1 className="my-3 text-4xl font-bold">Current User</h1>
+      <h1 className="my-3 text-4xl font-bold">Current Users</h1>
       <TableContainer component={Paper} sx={{ boxShadow: 3, p: 2 }}>
         <Table sx={{ minWidth: 500 }} aria-label="user table">
           <TableHead>
             <TableRow>
               <TableCell>Username</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(rowsPerPage > 0 ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage) : rows).map((row) => (
-              <TableRow key={row.id}>
+            {(rowsPerPage > 0
+              ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              : rows
+            ).map((row) => (
+              <TableRow key={row._id}>
                 <TableCell>{row.username}</TableCell>
                 <TableCell>{row.email}</TableCell>
+                <TableCell align="right">
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteClick(row)}
+                    aria-label="delete user"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {emptyRows > 0 && (
@@ -156,6 +206,29 @@ export default function CustomPaginationTable() {
           </TableFooter>
         </Table>
       </TableContainer>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Delete User"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete {userToDelete?.username}? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

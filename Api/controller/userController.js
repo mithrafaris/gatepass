@@ -92,3 +92,33 @@ exports.getSearching = async (req, res, next) => {
     next(error);  
   }
 }
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if id exists
+    if (!id) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    // Find and delete the user
+    const deletedUser = await User.findByIdAndDelete(id);
+    
+    // If user not found
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Remove password from response
+    const { password, ...rest } = deletedUser._doc;
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully',
+      deletedUser: rest
+    });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    next(error);
+  }
+};

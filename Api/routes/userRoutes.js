@@ -5,6 +5,7 @@ const {
   signIn,
   signOut,
   getuser,
+  deleteUser
 } = require('../controller/userController');
 const {
   createMaterial,
@@ -12,6 +13,7 @@ const {
   getMaterialsbyID,
   editMaterial,
   deleteMaterial,
+  
 } = require('../controller/materialController');
 const { verifyToken } = require('../utils/verifyUser');
 const { createPass, getpass, returnMaterial,deletePass,editPass } = require('../controller/gatePassController');
@@ -23,6 +25,7 @@ router.post('/signup', signUp);
 router.post('/signin', signIn);
 router.get('/signout', signOut);
 router.get('/getuser', getuser);
+router.delete('/delete/:id', deleteUser);
 
 // Material routes
 router.post('/material', createMaterial);
