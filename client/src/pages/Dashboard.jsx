@@ -32,6 +32,7 @@ function Dashboard() {
     PassNumber: Yup.number().required("Pass Number is required").positive().integer(),
     customerName: Yup.string().required("Customer Name is required"),
     customerAddress: Yup.string().required("Customer Address is required"),
+    Remarks: Yup.string(),
     materials: Yup.array()
       .of(
         Yup.object({
@@ -49,6 +50,7 @@ function Dashboard() {
     PassNumber: "",
     customerName: "",
     customerAddress: "",
+    Remarks: "",
     materials: [{ materialId: "", quantity: 1 }],
     OutDate: "",
     totalAmount: "",
@@ -85,52 +87,55 @@ function Dashboard() {
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white mb-8">Create Pass</h1>
 
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
               <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
                 {({ isSubmitting, values }) => (
                   <Form>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
-                        { name: "PassNumber", label: "Pass Number", type: "number" },
+                        { name: "PassNumber", label: "SL.NO", type: "number" },
                         { name: "customerName", label: "Customer Name", type: "text" },
                         { name: "customerAddress", label: "Customer Address", type: "text" },
+                        { name: "Remarks", label: "Remarks", type: "text" },
                         { name: "OutDate", label: "Out Date", type: "date" },
                         { name: "totalAmount", label: "Total Amount", type: "number" },
                         { name: "paymentMethod", label: "Payment Method", type: "text", placeholder: "e.g., Cash, Card, Online" },
                       ].map((field) => (
                         <div key={field.name}>
-                          <label className="block text-sm font-medium text-black mb-1">{field.label}</label>
-                          <Field type={field.type} name={field.name} className="form-input w-full border-gray-300 rounded-md text-black" />
+                          <label className="block text-sm font-medium text-black dark:text-white mb-1">{field.label}</label>
+                          <Field 
+                            type={field.type} 
+                            name={field.name} 
+                            className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-900 text-black dark:text-white" 
+                          />
                           <ErrorMessage name={field.name} component="div" className="text-red-500 text-sm mt-1" />
                         </div>
                       ))}
 
                       <div>
-                        <label className="block text-sm font-medium text-black mb-1">Materials</label>
+                        <label className="block text-sm font-medium text-black dark:text-white mb-1">Materials</label>
                         <FieldArray name="materials">
                           {({ insert, remove, push }) => (
                             <div>
                               {values.materials.map((_, index) => (
                                 <div key={index} className="flex space-x-4 mb-4">
-                                  <div className="w-1/2">
-                                    <Field as="select" name={`materials.${index}.materialId`} className="form-select w-full border-gray-300 rounded-md text-black">
-                                      <option value="" disabled>Select Material</option>
-                                      {materials.map((material) => (
-                                        <option key={material._id} value={material._id}>
-                                          {material.materialName}
-                                        </option>
-                                      ))}
-                                    </Field>
-                                    <ErrorMessage name={`materials.${index}.materialId`} component="div" className="text-red-500 text-sm mt-1" />
-                                  </div>
-                                  <div className="w-1/2">
-                                    <Field type="number" name={`materials.${index}.quantity`} className="form-input w-full border-gray-300 rounded-md text-black" />
-                                    <ErrorMessage name={`materials.${index}.quantity`} component="div" className="text-red-500 text-sm mt-1" />
-                                  </div>
-                                  <button type="button" onClick={() => remove(index)} className="text-red-500">Remove</button>
+                                  <Field as="select" name={`materials.${index}.materialId`} className="form-select w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white">
+                                    <option value="" disabled>Select Material</option>
+                                    {materials.map((material) => (
+                                      <option key={material._id} value={material._id}>
+                                        {material.materialName}
+                                      </option>
+                                    ))}
+                                  </Field>
+                                  <Field type="number" name={`materials.${index}.quantity`} className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white" />
+                                  <button type="button" onClick={() => remove(index)} className="text-red-500">
+                                    <FaTrash />
+                                  </button>
                                 </div>
                               ))}
-                              <button type="button" onClick={() => push({ materialId: "", quantity: 1 })} className="text-blue-500">Add Material</button>
+                              <button type="button" onClick={() => push({ materialId: "", quantity: 1 })} className="text-blue-500">
+                                <FaPlus /> Add Material
+                              </button>
                             </div>
                           )}
                         </FieldArray>
@@ -138,11 +143,13 @@ function Dashboard() {
                     </div>
 
                     <div className="mt-6">
-                      <button type="submit" disabled={isSubmitting}   className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >   <FaPaperPlane className="w-4 h-4 mr-2" /> 
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                    
-                       
+                      <button 
+                        type="submit" 
+                        disabled={isSubmitting}   
+                        className="inline-flex items-center px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      >   
+                        <FaPaperPlane className="w-4 h-4 mr-2" /> 
+                        {isSubmitting ? "Submitting..." : "Submit"}
                       </button>
                     </div>
                   </Form>

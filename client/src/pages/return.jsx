@@ -79,50 +79,56 @@ function Return() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-200">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <main className="grow">
           <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-            <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8">
               Return Material
             </h1>
-            <div className="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+            <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
               <form onSubmit={handleSubmit} className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pass Number</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      SL.No
+                    </label>
                     <input
                       type="text"
                       name="PassNumber"
                       value={formData.PassNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Customer Name
+                    </label>
                     <input
                       type="text"
                       name="customerName"
                       value={formData.customerName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Return Date</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Return Date
+                    </label>
                     <input
                       type="date"
                       name="ReturnDate"
                       value={formData.ReturnDate}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                       required
                     />
                   </div>
@@ -130,11 +136,11 @@ function Return() {
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">Materials</h3>
+                    <h3 className="text-lg font-medium">Materials</h3>
                     <button
                       type="button"
                       onClick={addMaterialField}
-                      className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
                     >
                       <FaPlus className="w-4 h-4 mr-2" />
                       Add Material
@@ -149,7 +155,7 @@ function Return() {
                         placeholder="Material Name"
                         value={mat.materialName}
                         onChange={(e) => handleChange(e, index)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                         required
                       />
                       <input
@@ -158,18 +164,16 @@ function Return() {
                         placeholder="Quantity"
                         value={mat.quantity}
                         onChange={(e) => handleChange(e, index)}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                         required
                       />
-                      {formData.materials.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeMaterialField(index)}
-                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500"
-                        >
-                          <FaTrash className="w-5 h-5" />
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeMaterialField(index)}
+                        className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
+                      >
+                        <FaTrash className="w-5 h-5" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -177,7 +181,7 @@ function Return() {
                 <div className="mt-6 flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="inline-flex items-center px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
                   >
                     <FaPaperPlane className="w-4 h-4 mr-2" />
                     Submit Return

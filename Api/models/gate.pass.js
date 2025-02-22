@@ -9,10 +9,14 @@ const passSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    Remarks:{
+        type: String
+    },
     customerAddress: { 
         type: String, 
         required: true 
     },
+    
     materials: [
         {
             materialId: { 
@@ -58,4 +62,4 @@ const passSchema = new mongoose.Schema({
 
 const Pass = mongoose.model("Pass", passSchema);
 
-module.exports = Pass;
+module.exports = Pass; 

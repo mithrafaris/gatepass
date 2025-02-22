@@ -1,27 +1,20 @@
 import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Backdrop from '@mui/material/Backdrop';
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
-import Fade from '@mui/material/Fade';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { TextField, MenuItem } from '@mui/material';
+import {
+  Backdrop,
+  Box,
+  Modal,
+  Fade,
+  Button,
+  Typography,
+  TextField,
+  MenuItem,
+  useTheme
+} from '@mui/material';
 
-const style = {
-  position: 'absolute',
-  top: '40%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  borderRadius: 2,
-};
-
-export default function AddMaterial() {
+const AddMaterial = () => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     materialNumber: '',
@@ -31,6 +24,27 @@ export default function AddMaterial() {
     description: '',
     category: 'select',
   });
+
+  const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: theme.palette.mode === 'dark' ? '#1a1a1a' : '#ffffff',
+    border: `1px solid ${theme.palette.mode === 'dark' ? '#333' : '#e0e0e0'}`,
+    boxShadow: theme.shadows[24],
+    p: 4,
+    borderRadius: 2,
+  };
+
+  const violetButtonStyle = {
+    backgroundColor: '#7c4dff',
+    '&:hover': {
+      backgroundColor: '#651fff',
+    },
+    color: '#ffffff',
+  };
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -61,7 +75,6 @@ export default function AddMaterial() {
       const data = await res.json();
       toast.success('Material added successfully!');
 
-      // Reset form data after successful submission
       setFormData({
         materialNumber: '',
         materialName: '',
@@ -77,10 +90,14 @@ export default function AddMaterial() {
   };
 
   return (
-    <div>
-      <ToastContainer position="top-right" autoClose={3000} />
-      <Button variant="outlined" color="info" onClick={handleOpen}>
-        Add
+    <Box sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
+      <ToastContainer position="top-right" autoClose={3000} theme={theme.palette.mode} />
+      <Button
+        variant="contained"
+        onClick={handleOpen}
+        sx={violetButtonStyle}
+      >
+        Add Material
       </Button>
       <Modal
         aria-labelledby="add-material-title"
@@ -94,53 +111,42 @@ export default function AddMaterial() {
         }}
       >
         <Fade in={open}>
-          <Box component="form" onSubmit={handleSubmit} sx={style}>
-            <Typography id="add-material-title" variant="h6" component="h2" gutterBottom>
+          <Box component="form" onSubmit={handleSubmit} sx={modalStyle}>
+            <Typography 
+              id="add-material-title" 
+              variant="h6" 
+              component="h2" 
+              gutterBottom
+              color="text.primary"
+            >
               Add Material
             </Typography>
 
-            <TextField
-              required
-              label="Material Number"
-              name="materialNumber"
-              type="number"
-              value={formData.materialNumber}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-
-            <TextField
-              required
-              label="Material Name"
-              name="materialName"
-              value={formData.materialName}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-
-            <TextField
-              required
-              label="Price"
-              name="price"
-              type="number"
-              value={formData.price}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
-
-            <TextField
-              required
-              label="Stock"
-              name="stock"
-              type="number"
-              value={formData.stock}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
+            {[
+              { name: 'materialNumber', label: 'Material Number', type: 'number' },
+              { name: 'materialName', label: 'Material Name', type: 'text' },
+              { name: 'price', label: 'Price', type: 'number' },
+              { name: 'stock', label: 'Stock', type: 'number' },
+            ].map((field) => (
+              <TextField
+                key={field.name}
+                required
+                label={field.label}
+                name={field.name}
+                type={field.type}
+                value={formData[field.name]}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0',
+                    },
+                  },
+                }}
+              />
+            ))}
 
             <TextField
               required
@@ -152,6 +158,13 @@ export default function AddMaterial() {
               margin="normal"
               multiline
               rows={3}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0',
+                  },
+                },
+              }}
             />
 
             <TextField
@@ -163,6 +176,13 @@ export default function AddMaterial() {
               onChange={handleChange}
               fullWidth
               margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0',
+                  },
+                },
+              }}
             >
               {['select', 'Accessories', 'Tools', 'Parts'].map((option) => (
                 <MenuItem key={option} value={option}>
@@ -171,12 +191,22 @@ export default function AddMaterial() {
               ))}
             </TextField>
 
-            <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              sx={{
+                ...violetButtonStyle,
+                mt: 2,
+                width: '100%'
+              }}
+            >
               Submit
             </Button>
           </Box>
         </Fade>
       </Modal>
-    </div>
+    </Box>
   );
-}
+};
+
+export default AddMaterial;
