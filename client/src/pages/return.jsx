@@ -3,7 +3,7 @@ import Sidebar from "../partials/Sidebar";
 import Header from "../partials/Header";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaTrash, FaPlus, FaPaperPlane } from "react-icons/fa"; // Import icons
+import { FaTrash, FaPlus, FaPaperPlane } from "react-icons/fa"; 
 
 function Return() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -84,13 +84,14 @@ function Return() {
       <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <main className="grow">
-          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-7xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8">
               Return Material
             </h1>
-            <div className="max-w-6xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
-              <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            <div className="max-w-4xl mx-auto p-5 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+              <form onSubmit={handleSubmit}>
+                {/* Form Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       SL.No
@@ -100,7 +101,7 @@ function Return() {
                       name="PassNumber"
                       value={formData.PassNumber}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-2 focus:ring-violet-500"
                       required
                     />
                   </div>
@@ -114,7 +115,7 @@ function Return() {
                       name="customerName"
                       value={formData.customerName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-2 focus:ring-violet-500"
                       required
                     />
                   </div>
@@ -128,19 +129,20 @@ function Return() {
                       name="ReturnDate"
                       value={formData.ReturnDate}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:ring-2 focus:ring-violet-500"
                       required
                     />
                   </div>
                 </div>
 
+                {/* Material Fields */}
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium">Materials</h3>
                     <button
                       type="button"
                       onClick={addMaterialField}
-                      className="inline-flex items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="inline-flex items-center px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700"
                     >
                       <FaPlus className="w-4 h-4 mr-2" />
                       Add Material
@@ -148,23 +150,23 @@ function Return() {
                   </div>
 
                   {formData.materials.map((mat, index) => (
-                    <div key={index} className="flex items-center gap-4">
+                    <div key={index} className="flex flex-row sm:flex-row items-center gap-1">
                       <input
                         type="text"
                         name="materialName"
                         placeholder="Material Name"
                         value={mat.materialName}
                         onChange={(e) => handleChange(e, index)}
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                         required
                       />
                       <input
                         type="number"
                         name="quantity"
-                        placeholder="Quantity"
+                        placeholder="Qty"
                         value={mat.quantity}
                         onChange={(e) => handleChange(e, index)}
-                        className="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                        className="w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-300"
                         required
                       />
                       <button
@@ -178,11 +180,9 @@ function Return() {
                   ))}
                 </div>
 
+                {/* Submit Button */}
                 <div className="mt-6 flex justify-end">
-                  <button
-                    type="submit"
-                    className="inline-flex items-center px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                  >
+                  <button type="submit" className="inline-flex items-center px-6 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700">
                     <FaPaperPlane className="w-4 h-4 mr-2" />
                     Submit Return
                   </button>

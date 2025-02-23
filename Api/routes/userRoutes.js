@@ -25,7 +25,7 @@ router.post('/signup', signUp);
 router.post('/signin', signIn);
 router.get('/signout', signOut);
 router.get('/getuser', getuser);
-router.delete('/delete/:id', deleteUser);
+router.delete('/delete/:id',verifyToken, deleteUser);
 
 // Material routes
 router.post('/material', createMaterial);

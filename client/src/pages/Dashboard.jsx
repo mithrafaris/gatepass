@@ -17,6 +17,7 @@ function Dashboard() {
         if (response.ok) {
           const data = await response.json();
           setMaterials(data.materials);
+          console.log(data.materials);
         } else {
           toast.error("Failed to fetch materials!");
         }
@@ -27,6 +28,20 @@ function Dashboard() {
 
     fetchMaterials();
   }, []);
+
+  // Calculate price based on selected material
+  const getPrice = (materialId) => {
+    const material = materials.find(m => m._id === materialId);
+    return material ? material.price : 0;
+  };
+
+  // Calculate total amount based on materials and quantities
+  const calculateTotalAmount = (materialItems) => {
+    return materialItems.reduce((total, item) => {
+      const price = getPrice(item.materialId);
+      return total + (price * item.quantity);
+    }, 0);
+  };
 
   const validationSchema = Yup.object({
     PassNumber: Yup.number().required("Pass Number is required").positive().integer(),
@@ -59,10 +74,17 @@ function Dashboard() {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
+      // Calculate final total amount before submission
+      const finalTotalAmount = calculateTotalAmount(values.materials);
+      const submissionValues = {
+        ...values,
+        totalAmount: finalTotalAmount
+      };
+
       const response = await fetch("/user/gatepass", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(submissionValues),
       });
       if (response.ok) {
         toast.success("Pass created successfully!");
@@ -88,8 +110,12 @@ function Dashboard() {
             <h1 className="text-2xl md:text-3xl font-bold text-black dark:text-white mb-8">Create Pass</h1>
 
             <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-md">
-              <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
-                {({ isSubmitting, values }) => (
+              <Formik 
+                initialValues={initialValues} 
+                validationSchema={validationSchema} 
+                onSubmit={handleSubmit}
+              >
+                {({ isSubmitting, values, setFieldValue }) => (
                   <Form>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {[
@@ -98,47 +124,102 @@ function Dashboard() {
                         { name: "customerAddress", label: "Customer Address", type: "text" },
                         { name: "Remarks", label: "Remarks", type: "text" },
                         { name: "OutDate", label: "Out Date", type: "date" },
-                        { name: "totalAmount", label: "Total Amount", type: "number" },
                         { name: "paymentMethod", label: "Payment Method", type: "text", placeholder: "e.g., Cash, Card, Online" },
                       ].map((field) => (
                         <div key={field.name}>
-                          <label className="block text-sm font-medium text-black dark:text-white mb-1">{field.label}</label>
+                          <label className="block text-sm font-medium text-black dark:text-white mb-1">
+                            {field.label}
+                          </label>
                           <Field 
                             type={field.type} 
                             name={field.name} 
+                            placeholder={field.placeholder}
                             className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-900 text-black dark:text-white" 
                           />
-                          <ErrorMessage name={field.name} component="div" className="text-red-500 text-sm mt-1" />
+                          <ErrorMessage 
+                            name={field.name} 
+                            component="div" 
+                            className="text-red-500 text-sm mt-1" 
+                          />
                         </div>
                       ))}
 
                       <div>
-                        <label className="block text-sm font-medium text-black dark:text-white mb-1">Materials</label>
+                        <label className="block text-sm font-medium text-black dark:text-white mb-1">
+                          Materials
+                        </label>
                         <FieldArray name="materials">
                           {({ insert, remove, push }) => (
                             <div>
                               {values.materials.map((_, index) => (
                                 <div key={index} className="flex space-x-4 mb-4">
-                                  <Field as="select" name={`materials.${index}.materialId`} className="form-select w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white">
-                                    <option value="" disabled>Select Material</option>
+                                  <Field 
+                                    as="select" 
+                                    name={`materials.${index}.materialId`}
+                                    onChange={(e) => {
+                                      setFieldValue(`materials.${index}.materialId`, e.target.value);
+                                      // Update total amount when material changes
+                                      const newMaterials = [...values.materials];
+                                      newMaterials[index].materialId = e.target.value;
+                                      setFieldValue('totalAmount', calculateTotalAmount(newMaterials));
+                                    }}
+                                    className="form-select w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white"
+                                  >
+                                    <option value="">Select Material</option>
                                     {materials.map((material) => (
                                       <option key={material._id} value={material._id}>
-                                        {material.materialName}
+                                        {material.materialName} - ₹{material.price}
                                       </option>
                                     ))}
                                   </Field>
-                                  <Field type="number" name={`materials.${index}.quantity`} className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white" />
-                                  <button type="button" onClick={() => remove(index)} className="text-red-500">
+                                  <Field 
+                                    type="number" 
+                                    name={`materials.${index}.quantity`}
+                                    onChange={(e) => {
+                                      setFieldValue(`materials.${index}.quantity`, e.target.value);
+                                      // Update total amount when quantity changes
+                                      const newMaterials = [...values.materials];
+                                      newMaterials[index].quantity = Number(e.target.value);
+                                      setFieldValue('totalAmount', calculateTotalAmount(newMaterials));
+                                    }}
+                                    className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white" 
+                                  />
+                                  <div className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white">
+                                    ₹{getPrice(values.materials[index].materialId) * values.materials[index].quantity}
+                                  </div>
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                      remove(index);
+                                      // Update total amount when material is removed
+                                      const newMaterials = values.materials.filter((_, i) => i !== index);
+                                      setFieldValue('totalAmount', calculateTotalAmount(newMaterials));
+                                    }} 
+                                    className="text-red-500"
+                                  >
                                     <FaTrash />
                                   </button>
                                 </div>
                               ))}
-                              <button type="button" onClick={() => push({ materialId: "", quantity: 1 })} className="text-blue-500">
+                              <button 
+                                type="button" 
+                                onClick={() => push({ materialId: "", quantity: 1 })} 
+                                className="text-blue-500"
+                              >
                                 <FaPlus /> Add Material
                               </button>
                             </div>
                           )}
                         </FieldArray>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-black dark:text-white mb-1">
+                          Total Amount
+                        </label>
+                        <div className="form-input w-full border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-black dark:text-white">
+                          ₹{calculateTotalAmount(values.materials)}
+                        </div>
                       </div>
                     </div>
 
