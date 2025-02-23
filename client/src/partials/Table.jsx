@@ -14,7 +14,8 @@ import {
   IconButton,
   Button,
   TextField,
-  Box
+  Box,
+  Typography
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import InfoIcon from '@mui/icons-material/Info';
@@ -22,11 +23,11 @@ import SearchIcon from '@mui/icons-material/Search';
 
 const columns = [
   { id: 'PassNumber', label: 'Sl.No', minWidth: 90 },
-  { id: 'customerName', label: 'Customer', minWidth: 100 },
-  { id: 'OutDate', label: 'Out Date', minWidth: 100, align: 'right' },
-  { id: 'ReturnDate', label: 'Return Date', minWidth: 100, align: 'right' },
-  { id: 'totalAmount', label: 'Total Amount', minWidth: 100, align: 'right' },
-  { id: 'materials', label: 'Materials', minWidth: 150 },
+  { id: 'customerName', label: 'Customer', minWidth: 150 },
+  { id: 'OutDate', label: 'Out Date', minWidth: 120, align: 'center' },
+  { id: 'ReturnDate', label: 'Return Date', minWidth: 120, align: 'center' },
+  { id: 'totalAmount', label: 'Total Amount', minWidth: 120, align: 'right' },
+  { id: 'materials', label: 'Materials', minWidth: 200 },
 ];
 
 export default function GatePassList() {
@@ -42,17 +43,15 @@ export default function GatePassList() {
   }, []);
 
   useEffect(() => {
-    // Filter rows based on search term
     const filtered = rows.filter(row => {
       const searchLower = searchTerm.toLowerCase();
-      const passNumber = String(row.PassNumber).toLowerCase();
+      const passNumber = String(row.PassNumber || '').toLowerCase();
       const customerName = (row.customerName || '').toLowerCase();
-      
-      return passNumber.includes(searchLower) || 
-             customerName.includes(searchLower);
+
+      return passNumber.includes(searchLower) || customerName.includes(searchLower);
     });
     setFilteredRows(filtered);
-    setPage(0); 
+    setPage(0);
   }, [searchTerm, rows]);
 
   const fetchMaterials = async () => {
@@ -96,56 +95,77 @@ export default function GatePassList() {
   };
 
   return (
-    <div>
-      <h1 className="my-3 text-4xl font-bold">Gate Pass List</h1>
+    <Box sx={{ maxWidth: '100%', padding: 3 }}>
+      <Typography variant="h4" fontWeight="bold" gutterBottom>
+        Gate Pass List
+      </Typography>
+
       <Paper sx={{ width: '100%', overflow: 'hidden', padding: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          
+        {/* Search Bar */}
+        <Box sx={{ display: 'block', alignItems: 'center', mb: 2 }}>
           <TextField
-           fullWidth
-            variant="outlined"
+          
+            
             placeholder="Search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             size="small"
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: 'gray' }} />,
+            }}
           />
-          
         </Box>
+
+        {/* Table Container */}
         <TableContainer>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
                 {columns.map((column) => (
-                  <TableCell key={column.id} align={column.align} style={{ minWidth: column.minWidth }}>
+                  <TableCell key={column.id} align={column.align || 'left'} style={{ minWidth: column.minWidth }}>
                     {column.label}
                   </TableCell>
                 ))}
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {filteredRows
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row) => (
-                  <TableRow hover key={row._id}>
-                    {columns.map((column) => (
-                      <TableCell key={column.id} align={column.align}>
-                        {column.id === 'materials' 
-                          ? (row.materials || []).map(mat => `${mat.materialName}(Qty: ${mat.quantity})`).join(', ')
-                          : row[column.id] || '-'}
-                      </TableCell>
-                    ))}
-                    <TableCell align="center">
-                      <IconButton onClick={() => handleDelete(row._id)} color="error">
-                        <DeleteIcon />
-                      </IconButton>
-                      <Button color="primary" onClick={() => handleViewDetails(row)} startIcon={<InfoIcon />}></Button>
+              {filteredRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                <TableRow hover key={row._id}>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} align={column.align || 'left'}>
+                      {column.id === 'materials' ? (
+                        (row.materials || []).map((mat, index) => (
+                          <Typography key={index} variant="body2">
+                            {mat.materialName} (Qty: {mat.quantity})
+                          </Typography>
+                        ))
+                      ) : (
+                        row[column.id] || '-'
+                      )}
                     </TableCell>
-                  </TableRow>
-                ))}
+                  ))}
+                  {/* Actions */}
+                  <TableCell align="center">
+                    <IconButton onClick={() => handleDelete(row._id)} color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                    <Button
+                      color="primary"
+                      onClick={() => handleViewDetails(row)}
+                      startIcon={<InfoIcon />}
+                      sx={{ ml: 1 }}
+                    > 
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination */}
         <TablePagination
           rowsPerPageOptions={[10, 25, 100]}
           component="div"
@@ -156,6 +176,6 @@ export default function GatePassList() {
           onRowsPerPageChange={(event) => setRowsPerPage(+event.target.value)}
         />
       </Paper>
-    </div>
+    </Box>
   );
 }
