@@ -32,9 +32,6 @@ function Login() {
 
       if (res.status === 200) {
         dispatch(signInSuccess(res.data));
-        toast.success('Login successful', {
-          icon: '👏',
-        });
         navigate('/dashboard');
       } else {
         dispatch(signInFailure(res.data.message));

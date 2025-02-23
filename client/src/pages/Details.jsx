@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button, TextField, Paper } from '@mui/material';
+import { Button, TextField, Paper, Typography, Box } from '@mui/material';
 import Sidebar from '../partials/Sidebar';
 import Header from '../partials/Header';
 
@@ -23,9 +23,15 @@ export default function Details() {
     setCustomer({ ...customer, [e.target.name]: e.target.value });
   };
 
+  const handleMaterialChange = (index, field, value) => {
+    const updatedMaterials = [...(customer.materials || [])];
+    updatedMaterials[index] = { ...updatedMaterials[index], [field]: value };
+    setCustomer({ ...customer, materials: updatedMaterials });
+  };
+
   const handleSave = async () => {
     try {
-      const response = await fetch(`/user/editPass/${customer._id}`, {  // Use _id instead of PassNumber
+      const response = await fetch(`/user/editPass/${customer._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(customer),
@@ -41,7 +47,6 @@ export default function Details() {
       console.error('Error updating details:', error);
     }
   };
-  
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -60,6 +65,37 @@ export default function Details() {
               <TextField fullWidth margin="normal" label="Total Amount" name="totalAmount" value={customer.totalAmount || ''} onChange={handleChange} disabled={!isEditing} />
               <TextField fullWidth margin="normal" label="Payment Method" name="paymentMethod" value={customer.paymentMethod || ''} onChange={handleChange} disabled={!isEditing} />
               <TextField fullWidth margin="normal" label="Remarks" name="Remarks" value={customer.Remarks || ''} onChange={handleChange} disabled={!isEditing} />
+
+              {/* Materials Section */}
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="h6">Materials</Typography>
+                {customer.materials && customer.materials.length > 0 ? (
+                  customer.materials.map((material, index) => (
+                    <Box key={index} sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                      <TextField
+                        fullWidth
+                        label="Material Name"
+                        value={material.materialName || ''}
+                        onChange={(e) => handleMaterialChange(index, 'materialName', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Quantity"
+                        type="number"
+                        value={material.quantity || ''}
+                        onChange={(e) => handleMaterialChange(index, 'quantity', e.target.value)}
+                        disabled={!isEditing}
+                      />
+                    </Box>
+                  ))
+                ) : (
+                  <Typography variant="body2" color="textSecondary">
+                    No materials found.
+                  </Typography>
+                )}
+              </Box>
+
               <Button variant="contained" color="primary" sx={{ mt: 2 }} onClick={() => setIsEditing(!isEditing)}>
                 {isEditing ? 'Cancel' : 'Edit'}
               </Button>
